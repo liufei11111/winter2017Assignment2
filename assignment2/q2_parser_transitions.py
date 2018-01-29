@@ -49,6 +49,17 @@ class PartialParse(object):
             curr = self.stack.pop(len(self.stack)-1)
             self.stack.append(curr)
             self.dependencies.append((curr,dep))
+
+        # if transition == "S":
+        #     self.stack.append(self.buffer.pop(0))
+        # elif transition == "LA":
+        #     dependent, head = self.stack[-2:]
+        #     self.stack.pop(-2)
+        #     self.dependencies.append((head, dependent))
+        # elif transition == "RA":
+        #     head, dependent = self.stack[-2:]
+        #     self.stack.pop(-1)
+        #     self.dependencies.append((head, dependent))
         ### END YOUR CODE
 
     def parse(self, transitions):
@@ -90,49 +101,48 @@ def minibatch_parse(sentences, model, batch_size):
     """
 
     ### YOUR CODE HERE
-    # partial_parses = [PartialParse(sentence) for sentence in sentences]
-    # unfinished_parses = partial_parses[:]
-    #
-    # while unfinished_parses:
-    #     minibatch_parses = unfinished_parses[:batch_size]
-    #     transitions = model.predict(minibatch_parses)
-    #
-    #     for parse, transition in zip(minibatch_parses, transitions):
-    #         parse.parse_step(transition)
-    #         if len(parse.stack) < 2 and len(parse.buffer) < 1:
-    #             unfinished_parses.remove(parse)
-    #
-    # dependencies = [p.dependencies for p in partial_parses]
-
-
     partial_parses = [PartialParse(sentence) for sentence in sentences]
-    length_sentences = len(sentences)
-    num_batches = length_sentences / batch_size + (0 if length_sentences % batch_size == 0 else 1)
-    dependencies = []
-    for i in xrange(0,num_batches):
-        partial_parses = []
-        steps_left = []
-        samples_left = min(length_sentences - i*batch_size,batch_size)
-        for j in xrange(0, samples_left):
-            partial_parses.append(PartialParse(sentences[i*batch_size+j]))
-            steps_left.append(2*len(sentences[i*batch_size+j]))
-        not_all_transition_finished = True
-        index_not_finished = [i for i in xrange(samples_left) if steps_left[i] > 0]
-        while not_all_transition_finished:
-            curr_partial_parses = select_based_on_index_list(partial_parses, index_not_finished)
-            # print "curr_partial_parses", [x for x in curr_partial_parses]
-            transitions = model.predict(curr_partial_parses)
-            not_all_transition_finished = False
-            temp = []
-            for j in xrange(len(index_not_finished)):
-                curr_index = index_not_finished[j]
-                partial_parses[curr_index].parse_step(transitions[j])
-                steps_left[curr_index] -= 1
-                if steps_left[curr_index] > 0:
-                    not_all_transition_finished = True
-                    temp.append(curr_index)
-            index_not_finished = temp
-        map(lambda x: dependencies.append(x.dependencies), partial_parses)
+    unfinished_parses = partial_parses[:]
+
+    while unfinished_parses:
+        minibatch_parses = unfinished_parses[:batch_size]
+        transitions = model.predict(minibatch_parses)
+
+        for parse, transition in zip(minibatch_parses, transitions):
+            parse.parse_step(transition)
+            if len(parse.stack) < 2 and len(parse.buffer) < 1:
+                unfinished_parses.remove(parse)
+
+    dependencies = [p.dependencies for p in partial_parses]
+
+
+    # length_sentences = len(sentences)
+    # num_batches = length_sentences / batch_size + (0 if length_sentences % batch_size == 0 else 1)
+    # dependencies = []
+    # for i in xrange(0,num_batches):
+    #     partial_parses = []
+    #     steps_left = []
+    #     samples_left = min(length_sentences - i*batch_size,batch_size)
+    #     for j in xrange(0, samples_left):
+    #         partial_parses.append(PartialParse(sentences[i*batch_size+j]))
+    #         steps_left.append(2*len(sentences[i*batch_size+j]))
+    #     not_all_transition_finished = True
+    #     index_not_finished = [i for i in xrange(samples_left) if steps_left[i] > 0]
+    #     while not_all_transition_finished:
+    #         curr_partial_parses = select_based_on_index_list(partial_parses, index_not_finished)
+    #         # print "curr_partial_parses", [x for x in curr_partial_parses]
+    #         transitions = model.predict(curr_partial_parses)
+    #         not_all_transition_finished = False
+    #         temp = []
+    #         for j in xrange(len(index_not_finished)):
+    #             curr_index = index_not_finished[j]
+    #             partial_parses[curr_index].parse_step(transitions[j])
+    #             steps_left[curr_index] -= 1
+    #             if steps_left[curr_index] > 0:
+    #                 not_all_transition_finished = True
+    #                 temp.append(curr_index)
+    #         index_not_finished = temp
+    #     map(lambda x: dependencies.append(x.dependencies), partial_parses)
     ### END YOUR CODE
 
     return dependencies

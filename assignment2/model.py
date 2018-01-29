@@ -99,13 +99,22 @@ class Model(object):
         Returns:
             predictions: np.ndarray of shape (n_samples, n_classes)
         """
+
+
         feed = self.create_feed_dict(inputs_batch)
         predictions = sess.run(self.pred, feed_dict=feed)
-        print "predictions", predictions[:10]
+        # print "predictions", predictions[:10]
         return predictions
 
     def build(self):
         self.add_placeholders()
         self.pred = self.add_prediction_op()
+
+        #
+        # import tensorflow as tf
+        # self.pred = tf.Print(self.pred, [self.pred], "self.pred: ")
+
+
+
         self.loss = self.add_loss_op(self.pred)
         self.train_op = self.add_training_op(self.loss)
