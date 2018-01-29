@@ -25,6 +25,9 @@ def xavier_weight_init():
             out: tf.Tensor of specified shape sampled from the Xavier distribution.
         """
         ### YOUR CODE HERE
+        sum_dim = tf.cast(tf.reduce_sum(shape), tf.float32)
+        epsilon = tf.sqrt(6.0/sum_dim)
+        out = tf.random_uniform(shape,-epsilon, epsilon)
         ### END YOUR CODE
         return out
     # Returns defined initializer function.

@@ -101,6 +101,7 @@ class Model(object):
         """
         feed = self.create_feed_dict(inputs_batch)
         predictions = sess.run(self.pred, feed_dict=feed)
+        print "predictions", predictions[:10]
         return predictions
 
     def build(self):
