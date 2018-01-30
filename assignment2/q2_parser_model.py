@@ -57,15 +57,6 @@ class ParserModel(Model):
         self.input_placeholder = tf.placeholder(tf.int32, shape=(None, self.config.n_features))
         self.labels_placeholder = tf.placeholder(tf.float32, shape=(None, self.config.n_classes))
         self.dropout_placeholder = tf.placeholder(tf.float32)
-
-        # n_features = self.config.n_features
-        # n_classes = self.config.n_classes
-        #
-        # self.input_placeholder = tf.placeholder(tf.int32,
-        #                                         shape=(None, n_features))
-        # self.labels_placeholder = tf.placeholder(tf.float32,
-        #                                          (None, n_classes))
-        # self.dropout_placeholder = tf.placeholder(tf.float32,[])
         ### END YOUR CODE
 
     def create_feed_dict(self, inputs_batch, labels_batch=None, dropout=0):
@@ -91,17 +82,6 @@ class ParserModel(Model):
             feed_dict: The feed dictionary mapping from placeholders to values.
         """
         ### YOUR CODE HERE
-        # if labels_batch is None:
-        #     feed_dict = {
-        #         self.input_placeholder: inputs_batch,
-        #         self.dropout_placeholder: dropout
-        #     }
-        # else:
-        #     feed_dict = {
-        #         self.input_placeholder: inputs_batch,
-        #         self.dropout_placeholder: dropout,
-        #         self.labels_placeholder: labels_batch
-        #     }
 
         if labels_batch is None:
             feed_dict = {
@@ -135,18 +115,9 @@ class ParserModel(Model):
             embeddings: tf.Tensor of shape (None, n_features*embed_size)
         """
         ### YOUR CODE HERE
-        # np_embeding_to_tensor = tf.convert_to_tensor(self.pretrained_embeddings, dtype=tf.float32)
         np_embeding_to_tensor = tf.Variable(self.pretrained_embeddings)
         embeddings = tf.nn.embedding_lookup(np_embeding_to_tensor, self.input_placeholder)
         embeddings = tf.reshape(embeddings,[-1, self.config.n_features* self.config.embed_size])
-
-
-        # n_features = self.config.n_features
-        # embedding_size = self.config.embed_size
-        #
-        # vocabulary = tf.Variable(self.pretrained_embeddings)
-        # embeddings = tf.nn.embedding_lookup(vocabulary, self.input_placeholder)
-        # embeddings = tf.reshape(embeddings, (-1, n_features * embedding_size))
         ### END YOUR CODE
         return embeddings
 
@@ -171,40 +142,40 @@ class ParserModel(Model):
             pred: tf.Tensor of shape (batch_size, n_classes)
         """
 
-        # x = self.add_embedding()
-        # ## YOUR CODE HERE
-        # with tf.variable_scope("prediction_op"):
-        #     xavier_initializer = xavier_weight_init()
-        #     W = tf.get_variable("W", [self.config.n_features* self.config.embed_size, self.config.hidden_size],
-        #                         dtype=tf.float32, initializer=xavier_initializer)
-        #     b1 = tf.get_variable("b1", [1, self.config.hidden_size],
-        #                          dtype=tf.float32, initializer=xavier_initializer)
-        #     h = tf.nn.relu(tf.add(tf.matmul(x,W),b1))
-        #     h_drop = tf.nn.dropout(h, self.dropout_placeholder)
-        #     U = tf.get_variable("U", [self.config.hidden_size, self.config.n_classes],
-        #                         dtype=tf.float32, initializer=xavier_initializer)
-        #     b2 = tf.get_variable("b2", [1, self.config.n_classes],
-        #                          dtype=tf.float32, initializer=xavier_initializer)
-        #     pred = tf.add(tf.matmul(h_drop, U), b2)
+        x = self.add_embedding()
+        ## YOUR CODE HERE
+        with tf.variable_scope("prediction_op"):
+            xavier_initializer = xavier_weight_init()
+            W = tf.get_variable("W", [self.config.n_features* self.config.embed_size, self.config.hidden_size],
+                                 initializer=xavier_initializer)
+            b1 = tf.get_variable("b1", [1, self.config.hidden_size],
+                                  initializer=xavier_initializer)
+            h = tf.nn.relu(tf.add(tf.matmul(x,W),b1))
+            h_drop = tf.nn.dropout(h, self.dropout_placeholder)
+            U = tf.get_variable("U", [self.config.hidden_size, self.config.n_classes],
+                                 initializer=xavier_initializer)
+            b2 = tf.get_variable("b2", [1, self.config.n_classes],
+                                 initializer=xavier_initializer)
+            pred = tf.add(tf.matmul(h_drop, U), b2)
         #
 
-        x = self.add_embedding()
-
-        ### YOUR CODE HERE
-        xavier_init = xavier_weight_init()
-        n_features = self.config.n_features
-        n_classes = self.config.n_classes
-        embed_size = self.config.embed_size
-        hidden_size = self.config.hidden_size
-        W = tf.Variable(
-            xavier_init((n_features * embed_size, hidden_size)))
-        b1 = tf.Variable(xavier_init((1, hidden_size)))
-        U = tf.Variable(xavier_init((hidden_size, n_classes)))
-        b2 = tf.Variable(xavier_init((1, n_classes)))
-        z = tf.add(tf.matmul(x, W), b1)
-        h = tf.nn.relu(z)
-        h_drop = tf.nn.dropout(h, self.dropout_placeholder)
-        pred = tf.add(tf.matmul(h_drop, U), b2)
+        # x = self.add_embedding()
+        #
+        # ### YOUR CODE HERE
+        # xavier_init = xavier_weight_init()
+        # n_features = self.config.n_features
+        # n_classes = self.config.n_classes
+        # embed_size = self.config.embed_size
+        # hidden_size = self.config.hidden_size
+        # W = tf.Variable(
+        #     xavier_init((n_features * embed_size, hidden_size)))
+        # b1 = tf.Variable(xavier_init((1, hidden_size)))
+        # U = tf.Variable(xavier_init((hidden_size, n_classes)))
+        # b2 = tf.Variable(xavier_init((1, n_classes)))
+        # z = tf.add(tf.matmul(x, W), b1)
+        # h = tf.nn.relu(z)
+        # h_drop = tf.nn.dropout(h, self.dropout_placeholder)
+        # pred = tf.add(tf.matmul(h_drop, U), b2)
 
         ### END YOUR CODE
         return pred
@@ -226,10 +197,6 @@ class ParserModel(Model):
         temp = tf.nn.softmax_cross_entropy_with_logits(labels=self.labels_placeholder, logits=pred)
         loss = tf.reduce_mean(temp)
 
-        # probs = tf.nn.softmax_cross_entropy_with_logits(
-        #     logits=pred,
-        #     labels=self.labels_placeholder)
-        # loss = tf.reduce_mean(probs)
         ### END YOUR CODE
         return loss
 

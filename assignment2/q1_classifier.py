@@ -106,9 +106,7 @@ class SoftmaxModel(Model):
             b = tf.Variable(tf.zeros((1, self.config.n_classes)))
             W = tf.Variable(tf.zeros((self.config.n_features, self.config.n_classes)))
             linear_transformed = tf.add(tf.matmul(self.input_placeholder, W), b)
-            exponential = tf.exp(linear_transformed)
-            exp_sum = tf.reduce_sum(exponential, 1, keep_dims=True)
-            pred = tf.div(exponential, exp_sum)
+            pred = softmax(linear_transformed)
         ### END YOUR CODE
         return pred
 
