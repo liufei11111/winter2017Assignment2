@@ -157,25 +157,6 @@ class ParserModel(Model):
             b2 = tf.get_variable("b2", [1, self.config.n_classes],
                                  initializer=xavier_initializer)
             pred = tf.add(tf.matmul(h_drop, U), b2)
-        #
-
-        # x = self.add_embedding()
-        #
-        # ### YOUR CODE HERE
-        # xavier_init = xavier_weight_init()
-        # n_features = self.config.n_features
-        # n_classes = self.config.n_classes
-        # embed_size = self.config.embed_size
-        # hidden_size = self.config.hidden_size
-        # W = tf.Variable(
-        #     xavier_init((n_features * embed_size, hidden_size)))
-        # b1 = tf.Variable(xavier_init((1, hidden_size)))
-        # U = tf.Variable(xavier_init((hidden_size, n_classes)))
-        # b2 = tf.Variable(xavier_init((1, n_classes)))
-        # z = tf.add(tf.matmul(x, W), b1)
-        # h = tf.nn.relu(z)
-        # h_drop = tf.nn.dropout(h, self.dropout_placeholder)
-        # pred = tf.add(tf.matmul(h_drop, U), b2)
 
         ### END YOUR CODE
         return pred
