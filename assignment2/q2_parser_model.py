@@ -135,7 +135,8 @@ class ParserModel(Model):
             embeddings: tf.Tensor of shape (None, n_features*embed_size)
         """
         ### YOUR CODE HERE
-        np_embeding_to_tensor = tf.convert_to_tensor(self.pretrained_embeddings, dtype=tf.float32)
+        # np_embeding_to_tensor = tf.convert_to_tensor(self.pretrained_embeddings, dtype=tf.float32)
+        np_embeding_to_tensor = tf.Variable(self.pretrained_embeddings)
         embeddings = tf.nn.embedding_lookup(np_embeding_to_tensor, self.input_placeholder)
         embeddings = tf.reshape(embeddings,[-1, self.config.n_features* self.config.embed_size])
 
@@ -170,53 +171,40 @@ class ParserModel(Model):
             pred: tf.Tensor of shape (batch_size, n_classes)
         """
 
-        x = self.add_embedding()
-        ## YOUR CODE HERE
-        with tf.variable_scope("prediction_op"):
-            xavier_initializer = xavier_weight_init()
-            W = tf.get_variable("W", [self.config.n_features* self.config.embed_size, self.config.hidden_size],
-                                dtype=tf.float32, initializer=xavier_initializer)
-            b1 = tf.get_variable("b1", [1, self.config.hidden_size],
-                                 dtype=tf.float32, initializer=xavier_initializer)
-            h = tf.nn.relu(tf.add(tf.matmul(x,W),b1))
-            h_drop = tf.nn.dropout(h, self.dropout_placeholder)
-            U = tf.get_variable("U", [self.config.hidden_size, self.config.n_classes],
-                                dtype=tf.float32, initializer=xavier_initializer)
-            b2 = tf.get_variable("b2", [1, self.config.n_classes],
-                                 dtype=tf.float32, initializer=xavier_initializer)
-            pred = tf.add(tf.matmul(h_drop, U) , b2)
-
-
         # x = self.add_embedding()
+        # ## YOUR CODE HERE
+        # with tf.variable_scope("prediction_op"):
+        #     xavier_initializer = xavier_weight_init()
+        #     W = tf.get_variable("W", [self.config.n_features* self.config.embed_size, self.config.hidden_size],
+        #                         dtype=tf.float32, initializer=xavier_initializer)
+        #     b1 = tf.get_variable("b1", [1, self.config.hidden_size],
+        #                          dtype=tf.float32, initializer=xavier_initializer)
+        #     h = tf.nn.relu(tf.add(tf.matmul(x,W),b1))
+        #     h_drop = tf.nn.dropout(h, self.dropout_placeholder)
+        #     U = tf.get_variable("U", [self.config.hidden_size, self.config.n_classes],
+        #                         dtype=tf.float32, initializer=xavier_initializer)
+        #     b2 = tf.get_variable("b2", [1, self.config.n_classes],
+        #                          dtype=tf.float32, initializer=xavier_initializer)
+        #     pred = tf.add(tf.matmul(h_drop, U), b2)
+        #
+
+        x = self.add_embedding()
 
         ### YOUR CODE HERE
-        # x = tf.Print(x , [x ], "\n x in add_prediction_op: ")
-        # xavier_init = xavier_weight_init()
-        #
-        # n_features = self.config.n_features
-        # n_classes = self.config.n_classes
-        # embed_size = self.config.embed_size
-        # hidden_size = self.config.hidden_size
-        #
-        # W = tf.Variable(
-        #     xavier_init((n_features * embed_size, hidden_size)))
-        # b1 = tf.Variable(xavier_init((1, hidden_size)))
-        # U = tf.Variable(xavier_init((hidden_size, n_classes)))
-        # b2 = tf.Variable(xavier_init((1, n_classes)))
-        #
-        # z = tf.add(tf.matmul(x, W), b1)
-        #
-        # # z = tf.Print(z, [z], "\n z in add_prediction_op: ")
-        #
-        #
-        # h = tf.nn.relu(z)
-        # # h = tf.Print(h, [h], "\n h before dropout in add_prediction_op: ")
-        # h_drop = tf.nn.dropout(h, self.dropout_placeholder)
-        #
-        # # self.pred = tf.Print(self.pred, [self.pred], "self.pred: ")
-        #
-        #
-        # pred = tf.add(tf.matmul(h_drop, U), b2)
+        xavier_init = xavier_weight_init()
+        n_features = self.config.n_features
+        n_classes = self.config.n_classes
+        embed_size = self.config.embed_size
+        hidden_size = self.config.hidden_size
+        W = tf.Variable(
+            xavier_init((n_features * embed_size, hidden_size)))
+        b1 = tf.Variable(xavier_init((1, hidden_size)))
+        U = tf.Variable(xavier_init((hidden_size, n_classes)))
+        b2 = tf.Variable(xavier_init((1, n_classes)))
+        z = tf.add(tf.matmul(x, W), b1)
+        h = tf.nn.relu(z)
+        h_drop = tf.nn.dropout(h, self.dropout_placeholder)
+        pred = tf.add(tf.matmul(h_drop, U), b2)
 
         ### END YOUR CODE
         return pred
@@ -306,7 +294,7 @@ class ParserModel(Model):
         self.build()
 
 
-def main(debug=False):
+def main(debug=True):
     print 80 * "="
     print "INITIALIZING"
     print 80 * "="
