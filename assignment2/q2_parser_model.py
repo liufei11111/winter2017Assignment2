@@ -24,7 +24,7 @@ class Config(object):
     batch_size = 1024
     n_epochs = 20
     lr = 0.0005
-    l2 = 0.0005
+    l2 = 0.0001
 
 class ParserModel(Model):
     """
