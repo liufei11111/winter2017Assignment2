@@ -6,7 +6,7 @@ import tensorflow as tf
 from model import Model
 from q2_initialization import xavier_weight_init
 from utils.parser_utils import minibatches, load_and_preprocess_data
-
+from tensorflow.contrib import layers
 
 class Config(object):
     """Holds model hyperparams and data information.
@@ -22,9 +22,9 @@ class Config(object):
     embed_size = 50
     hidden_size = 200
     batch_size = 1024
-    n_epochs = 10
+    n_epochs = 20
     lr = 0.0005
-
+    l2 = 0.0005
 
 class ParserModel(Model):
     """
@@ -143,19 +143,20 @@ class ParserModel(Model):
         """
 
         x = self.add_embedding()
+        l2_regularizer = layers.l2_regularizer(self.config.l2)
         ## YOUR CODE HERE
         with tf.variable_scope("prediction_op"):
             xavier_initializer = xavier_weight_init()
             W = tf.get_variable("W", [self.config.n_features* self.config.embed_size, self.config.hidden_size],
-                                 initializer=xavier_initializer)
+                                 initializer=xavier_initializer, regularizer=l2_regularizer)
             b1 = tf.get_variable("b1", [1, self.config.hidden_size],
-                                  initializer=xavier_initializer)
+                                  initializer=xavier_initializer, regularizer=l2_regularizer)
             h = tf.nn.relu(tf.add(tf.matmul(x,W),b1))
             h_drop = tf.nn.dropout(h, self.dropout_placeholder)
             U = tf.get_variable("U", [self.config.hidden_size, self.config.n_classes],
-                                 initializer=xavier_initializer)
+                                 initializer=xavier_initializer, regularizer=l2_regularizer)
             b2 = tf.get_variable("b2", [1, self.config.n_classes],
-                                 initializer=xavier_initializer)
+                                 initializer=xavier_initializer, regularizer=l2_regularizer)
             pred = tf.add(tf.matmul(h_drop, U), b2)
 
         ### END YOUR CODE
@@ -176,8 +177,9 @@ class ParserModel(Model):
         """
         ### YOUR CODE HERE
         temp = tf.nn.softmax_cross_entropy_with_logits(labels=self.labels_placeholder, logits=pred)
-        loss = tf.reduce_mean(temp)
-
+        cross_entropy_loss = tf.reduce_mean(temp)
+        tf.losses.add_loss(cross_entropy_loss)
+        loss = tf.losses.get_total_loss(add_regularization_losses=True, name='total_loss')
         ### END YOUR CODE
         return loss
 
