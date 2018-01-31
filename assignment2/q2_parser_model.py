@@ -18,7 +18,7 @@ class Config(object):
     """
     n_features = 36
     n_classes = 3
-    dropout = 0.9  # (p_drop in the handout)
+    dropout = 0.95  # (p_drop in the handout)
     embed_size = 50
     hidden_size = 200
     batch_size = 1024
