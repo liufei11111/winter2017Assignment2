@@ -22,9 +22,9 @@ class Config(object):
     embed_size = 50
     hidden_size = 200
     batch_size = 1024
-    n_epochs = 10
+    n_epochs = 20
     lr = 0.0005
-    l2 = 0.0005
+    l2 = 0.01
 
 class ParserModel(Model):
     """
